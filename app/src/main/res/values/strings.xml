@@ -1,0 +1,11 @@
+<resources>
+
+    <string name="app_name">KCOU 88.1 FM</string>
+    <string name="button_play">Play Cool Music</string>
+    <string name="connection_warning">NO INTERNET CONNECTION</string>
+
+    <string name="track_name">TEST Track</string>
+    <string name="artist_name">TEST Artist</string>
+    <string name="album_name">TEST Album</string>
+
+</resources>
