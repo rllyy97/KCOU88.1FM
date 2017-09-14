@@ -1,7 +1,7 @@
 <resources>
 
     <string name="app_name">KCOU 88.1 FM</string>
-    <string name="button_play">Play Cool Music</string>
+    <string name="button_play">Play Music</string>
     <string name="connection_warning">NO INTERNET CONNECTION</string>
 
     <string name="track_name">TEST Track</string>

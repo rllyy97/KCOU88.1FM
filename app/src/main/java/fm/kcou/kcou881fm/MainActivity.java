@@ -27,7 +27,7 @@ import javax.xml.parsers.ParserConfigurationException;
 public class MainActivity extends AppCompatActivity {
 
     String stream1 = "http://radio.kcou.fm:8180/stream"; // your URL here
-    String stream1Meta = "http://sc7.shoutcaststreaming.us:2199/rpc/c8180/streaminfo.get?x=1";
+    String stream1Meta = "http://sc7.shoutcaststreaming.us:2199/rpc/c8180/streaminfo.get?x=1.xml";
     String stream2 = "";
     String stream2Meta = "";
 
@@ -48,12 +48,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void playPauseStream(View v){
+    public void playPauseStream(final View v){
         findViewById(R.id.connectionWarning).setVisibility(View.INVISIBLE);
         if(playing==1){
             mediaPlayer.stop();
             playing = 0;
             mediaPlayer.reset();
+            TextView playPauseButton = (TextView) findViewById(R.id.playButton);
+            playPauseButton.setText("Play Music");
         }
         else if(isNetworkAvailable()){
             try {
@@ -61,12 +63,20 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            TextView playPauseButton = (TextView) findViewById(R.id.playButton);
+            playPauseButton.setText("Buffering");
             mediaPlayer.prepareAsync();
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
                 public void onPrepared(MediaPlayer player){
                     player.start();
                     playing = 1;
-//                    getMetaData();
+                    TextView playPauseButton = (TextView) findViewById(R.id.playButton);
+                    playPauseButton.setText("Pause Music");
+//                    try {
+//                        getMetaData(v);
+//                    } catch (ParserConfigurationException e) {
+//                        e.printStackTrace();
+//                    }
                 }
             });
         }
@@ -79,8 +89,8 @@ public class MainActivity extends AppCompatActivity {
 
 //    DocumentBuilderFactory dbf1 = DocumentBuilderFactory.newInstance();
 //    DocumentBuilder db1 = dbf1.newDocumentBuilder();
-//    Document metaDoc1 = db1.parse(new URL(stream1Meta).openStream());
-
+//    Document metaDoc1 = db1.parse(new URL(stream1Meta).openStream()); // Causing crash on app open
+//
 //    public void getMetaData(View v) throws ParserConfigurationException {
 //        NodeList trackList = metaDoc1.getElementsByTagName("track");
 //        Element artist = (Element) trackList.item(0);
