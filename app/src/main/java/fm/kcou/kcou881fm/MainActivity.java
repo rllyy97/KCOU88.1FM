@@ -1,5 +1,5 @@
 package fm.kcou.kcou881fm;
-
+// Author: Riley Evans, started September 13 2017
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
