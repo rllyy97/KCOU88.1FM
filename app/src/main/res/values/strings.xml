@@ -8,4 +8,8 @@
     <string name="artist_name">TEST Artist</string>
     <string name="album_name">TEST Album</string>
 
+    <string name="play">Play Music</string>
+    <string name="buffering">Buffering</string>
+    <string name="pause">Pause Music</string>
+
 </resources>
