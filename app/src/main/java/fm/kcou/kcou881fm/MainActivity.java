@@ -9,9 +9,14 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -24,6 +29,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MyActivity";
 
     String stream1 = "http://radio.kcou.fm:8180/stream";
     String stream1Meta = "http://sc7.shoutcaststreaming.us:2199/rpc/c8180/streaminfo.get";
@@ -40,6 +47,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        TextView titleTextView = (TextView) findViewById(R.id.titleTextView);
+        TextView artistTextView = (TextView) findViewById(R.id.artistTextView);
+        TextView albumTextView = (TextView) findViewById(R.id.albumTextView);
+        titleTextView.setSelected(true);
+        artistTextView.setSelected(true);
+        albumTextView.setSelected(true);
 
     }
 
@@ -51,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
             playing = 0;
             ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
             playButton.setBackground(getResources().getDrawable(R.drawable.ic_radio_white_24px));
+                // Warning is not being handled to keep support for API 19, resolving requires API 21
             mediaPlayer.reset();
         }
 
@@ -77,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     playing = 1;
                     ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
                     playButton.setBackground(getResources().getDrawable(R.drawable.ic_pause_white_24px));
+                        // Warning is not being handled to keep support for API 19, resolving requires API 21
                     final Timer t = new Timer();
                     t.scheduleAtFixedRate(new TimerTask(){
                         public void run() {
@@ -97,8 +112,9 @@ public class MainActivity extends AppCompatActivity {
             findViewById(R.id.connectionWarning).setVisibility(View.VISIBLE);
             playing = 0;
         }
-
     }
+
+
 
     /////     Android Make API Call for json
 
@@ -113,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        protected Void onPostExecute() throws IOException, JSONException {
+        private Void onPostExecute() throws IOException, JSONException {
             runOnUiThread(new Runnable(){
                 @Override
                 public void run(){
@@ -151,9 +167,17 @@ public class MainActivity extends AppCompatActivity {
             TextView artistTextView = (TextView) findViewById(R.id.artistTextView);
             TextView titleTextView = (TextView) findViewById(R.id.titleTextView);
             TextView albumTextView = (TextView) findViewById(R.id.albumTextView);
+            ImageView albumArt = (ImageView) findViewById(R.id.albumArt);
             artistTextView.setText(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("artist"));
             titleTextView.setText(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("title"));
             albumTextView.setText(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("album"));
+            String albumArtURL = json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("imageurl");
+            if (albumArtURL.equals("http://sc7.shoutcaststreaming.us:2197/static/c8180/covers/nocover.png")){
+                Picasso.with(getApplicationContext()).load(R.drawable.no_cover).into(albumArt);
+            }
+            else{
+                Picasso.with(getApplicationContext()).load(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("imageurl")).into(albumArt);
+            }
         }
     }
 
