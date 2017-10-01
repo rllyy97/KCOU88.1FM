@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,18 +34,12 @@ public class MainActivity extends AppCompatActivity {
 
     MediaPlayer mediaPlayer = new MediaPlayer();
     int playing = 0; // 0=paused, 1=playing 2=connecting
-//
-//    public MainActivity() throws ParserConfigurationException, IOException, SAXException {
-//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//        if(!isNetworkAvailable()) {
-//            findViewById(R.id.connectionWarning).setVisibility(View.VISIBLE);
-//        }
 
     }
 
@@ -56,17 +52,11 @@ public class MainActivity extends AppCompatActivity {
             ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
             playButton.setBackground(getResources().getDrawable(R.drawable.ic_radio_white_24px));
             mediaPlayer.reset();
-//            TextView artistTextView = (TextView) findViewById(R.id.artistTextView);
-//            TextView titleTextView = (TextView) findViewById(R.id.titleTextView);
-//            TextView albumTextView = (TextView) findViewById(R.id.albumTextView);
-//            artistTextView.setText("");
-//            titleTextView.setText("");
-//            albumTextView.setText("");
-
         }
 
         else if(isNetworkAvailable()&&playing!=2){
             playing = 2;
+
             try {
                 mediaPlayer.setDataSource(stream1);
             } catch (IOException e) {
@@ -80,9 +70,6 @@ public class MainActivity extends AppCompatActivity {
             artistTextView.setText(R.string.buffering);
             albumTextView.setText("");
 
-            final AsyncMeta getMeta = new AsyncMeta();
-            getMeta.execute(stream1Meta);
-
             mediaPlayer.prepareAsync();
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
                 public void onPrepared(MediaPlayer player){
@@ -90,11 +77,19 @@ public class MainActivity extends AppCompatActivity {
                     playing = 1;
                     ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
                     playButton.setBackground(getResources().getDrawable(R.drawable.ic_pause_white_24px));
-                    try {
-                        getMeta.setStreamMeta();
-                    } catch (JSONException | IOException e) {
-                        e.printStackTrace();
-                    }
+                    final Timer t = new Timer();
+                    t.scheduleAtFixedRate(new TimerTask(){
+                        public void run() {
+                            if(playing!=0) {
+                                AsyncMeta getMeta = new AsyncMeta();
+                                getMeta.execute(stream1Meta);
+                            }
+                            else {
+                                t.purge();
+                                cancel();
+                            }
+                        }
+                    }, 0, 60000);
                 }
             });
         }
@@ -105,41 +100,38 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
     /////     Android Make API Call for json
 
     private class AsyncMeta extends AsyncTask<String, Void, Void> {
         protected Void doInBackground(String... url) {
             try {
                 json = readJsonFromUrl(url[0]);
-//                onPostExecute();
+                onPostExecute();
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
             return null;
         }
 
-//        protected Void onPostExecute() throws IOException, JSONException {
-//            runOnUiThread(new Runnable(){
-//                @Override
-//                public void run(){
-//                    try {
-//                        setStreamMeta();
-//                    } catch (JSONException | IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//            return null;
-//        }
+        protected Void onPostExecute() throws IOException, JSONException {
+            runOnUiThread(new Runnable(){
+                @Override
+                public void run(){
+                    try {
+                        setStreamMeta();
+                    } catch (JSONException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return null;
+        }
 
         private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
             try {
                 InputStream is = new URL(url).openStream();
                 BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
                 String jsonText = readAll(rd);
-//                jsonText = jsonText.split("\\?")[1];
                 JSONObject json = new JSONObject(jsonText);
                 is.close();
                 return json;
