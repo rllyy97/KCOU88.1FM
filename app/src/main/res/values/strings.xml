@@ -1,12 +1,12 @@
 <resources>
 
     <string name="app_name">KCOU 88.1 FM</string>
-    <string name="button_play">Play Music</string>
+    <string name="button_play">Play Or Pause Music</string>
     <string name="connection_warning">NO INTERNET CONNECTION</string>
 
-    <string name="track_name">TEST Track</string>
-    <string name="artist_name">TEST Artist</string>
-    <string name="album_name">TEST Album</string>
+    <string name="track_name"> </string>
+    <string name="artist_name">Click The Radio to Play</string>
+    <string name="album_name"> </string>
 
     <string name="play">Play Music</string>
     <string name="buffering">Buffering</string>
