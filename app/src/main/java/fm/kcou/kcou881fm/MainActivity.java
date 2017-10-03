@@ -13,8 +13,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -34,10 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
     String stream1 = "http://radio.kcou.fm:8180/stream";
     String stream1Meta = "http://sc7.shoutcaststreaming.us:2199/rpc/c8180/streaminfo.get";
+    String stream1Recent = "http://sc7.shoutcaststreaming.us:2199/recentfeed/c8180/json";
 //    String stream2 = "";
 //    String stream2Meta = "";
 
     JSONObject json;
+    JSONObject jsonRecent;
 
     MediaPlayer mediaPlayer = new MediaPlayer();
     int playing = 0; // 0=paused, 1=playing 2=connecting
@@ -54,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         artistTextView.setSelected(true);
         albumTextView.setSelected(true);
 
+
+        AsyncMeta getMeta = new AsyncMeta();
+        getMeta.execute(stream1Meta);
+        AsyncRecentMeta getRecentMeta = new AsyncRecentMeta();
+        getRecentMeta.execute(stream1Recent);
     }
 
     public void playPauseStream(final View v) throws JSONException, IOException {
@@ -98,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
                             if(playing!=0) {
                                 AsyncMeta getMeta = new AsyncMeta();
                                 getMeta.execute(stream1Meta);
+                                AsyncRecentMeta getRecentMeta = new AsyncRecentMeta();
+                                getRecentMeta.execute(stream1Recent);
                             }
                             else {
                                 t.purge();
@@ -113,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             playing = 0;
         }
     }
-
 
 
     /////     Android Make API Call for json
@@ -177,6 +187,78 @@ public class MainActivity extends AppCompatActivity {
             }
             else{
                 Picasso.with(getApplicationContext()).load(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("imageurl")).into(albumArt);
+            }
+        }
+    }
+
+    /////
+
+    /////     Android Make API Call for json
+
+    private class AsyncRecentMeta extends AsyncTask<String, Void, Void> {
+        protected Void doInBackground(String... url) {
+            try {
+                jsonRecent = readJsonFromUrl(url[0]);
+                onPostExecute();
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        private Void onPostExecute() throws IOException, JSONException {
+            runOnUiThread(new Runnable(){
+                @Override
+                public void run(){
+                    try {
+                        setStreamMeta();
+                    } catch (JSONException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return null;
+        }
+
+        private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+            try {
+                InputStream is = new URL(url).openStream();
+                BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                String jsonText = readAll(rd);
+                JSONObject json = new JSONObject(jsonText);
+                is.close();
+                return json;
+            } catch (IOException ex){
+                return null;
+            }
+        }
+
+        private String readAll(Reader rd) throws IOException {
+            StringBuilder sb = new StringBuilder();
+            int cp;
+            while ((cp = rd.read()) != -1) {sb.append((char) cp);}
+            return sb.toString();
+        }
+
+        private void setStreamMeta() throws JSONException, IOException {
+            String[][] data = new String[4][3];
+            for(int i=0;i<4;i++){
+                String fullTitle = jsonRecent.getJSONArray("items").getJSONObject(i+1).getString("title");
+                String[] track = fullTitle.split(" - ");
+                data[i][0] = track[1];
+                data[i][1] = track[0];
+                data[i][2] = jsonRecent.getJSONArray("items").getJSONObject(i+1).getString("description");
+            }
+
+            LinearLayout recentTracks = (LinearLayout) findViewById(R.id.whatWasThatRecent);
+            for(int j=0;j<4;j++){
+                View v = recentTracks.getChildAt(j);
+                LinearLayout l = (LinearLayout) v;
+                for(int k=0;k<3;k++){
+                    View t = l.getChildAt(k);
+                    TextView text = (TextView) t;
+                    text.setText(data[j][k]);
+                }
             }
         }
     }
