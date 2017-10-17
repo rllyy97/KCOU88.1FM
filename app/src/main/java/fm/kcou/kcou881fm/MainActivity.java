@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     JSONObject json;
     JSONObject jsonRecent;
+    JSONObject jsonArt;
 
     MediaPlayer mediaPlayer = new MediaPlayer();
     int playing = 0; // 0=paused, 1=playing 2=connecting
@@ -126,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /////     Android Make API Call for json
+    /////     Android Make API Call for json : Now Playing
 
     private class AsyncMeta extends AsyncTask<String, Void, Void> {
         protected Void doInBackground(String... url) {
@@ -177,23 +178,96 @@ public class MainActivity extends AppCompatActivity {
             TextView artistTextView = (TextView) findViewById(R.id.artistTextView);
             TextView titleTextView = (TextView) findViewById(R.id.titleTextView);
             TextView albumTextView = (TextView) findViewById(R.id.albumTextView);
-            ImageView albumArt = (ImageView) findViewById(R.id.albumArt);
-            artistTextView.setText(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("artist"));
-            titleTextView.setText(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("title"));
-            albumTextView.setText(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("album"));
-            String albumArtURL = json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("imageurl");
-            if (albumArtURL.equals("http://sc7.shoutcaststreaming.us:2197/static/c8180/covers/nocover.png")){
-                Picasso.with(getApplicationContext()).load(R.drawable.no_cover).into(albumArt);
-            }
-            else{
-                Picasso.with(getApplicationContext()).load(json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("imageurl")).into(albumArt);
-            }
+
+            String currentArtist = json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("artist");
+            String currentTitle = json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("title");
+            String currentAlbum = json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("album");
+
+            artistTextView.setText(currentArtist);
+            titleTextView.setText(currentTitle);
+            albumTextView.setText(currentAlbum);
+
+            AsyncMetaArt getArt = new AsyncMetaArt();
+            getArt.execute(currentTitle,currentArtist);
         }
     }
 
     /////
 
-    /////     Android Make API Call for json
+    private class AsyncMetaArt extends AsyncTask<String, Void, Void> {
+        protected Void doInBackground(String... param) {
+            if(!(param[0]=="Talk Break" || param[1]=="N/a")){
+                try {
+                    String trackSearchURL = "http://ws.audioscrobbler.com/2.0/?method=track.search&track=" + param[0] + "&artist=" + param[1] + "&api_key=03d2bcf571b5e6ea2c744cf32fd40cb9&format=json&limit=1";
+                    jsonArt = readJsonFromUrl(trackSearchURL);
+                    onPostExecute();
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                defaultArt();
+            }
+            return null;
+        }
+
+        private Void onPostExecute() throws IOException, JSONException {
+            runOnUiThread(new Runnable(){
+                @Override
+                public void run(){
+                    try {
+                        setArt();
+                    } catch (JSONException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            return null;
+        }
+
+        private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+            try {
+                InputStream is = new URL(url).openStream();
+                BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                String jsonText = readAll(rd);
+                JSONObject json = new JSONObject(jsonText);
+                is.close();
+                return json;
+            } catch (IOException ex){
+                return null;
+            }
+        }
+
+        private String readAll(Reader rd) throws IOException {
+            StringBuilder sb = new StringBuilder();
+            int cp;
+            while ((cp = rd.read()) != -1) {sb.append((char) cp);}
+            return sb.toString();
+        }
+
+        private void setArt() throws JSONException, IOException {
+            ImageView albumArt = (ImageView) findViewById(R.id.albumArt);
+            String albumArtURL = jsonArt.getJSONObject("results").getJSONObject("trackmatches").getJSONArray("track").getJSONObject(0).getJSONArray("image").getJSONObject(2).getString("#text");
+            Picasso.with(getApplicationContext()).load(albumArtURL).into(albumArt);
+            albumArt.setScaleX(1);
+            albumArt.setScaleY(1);
+        }
+
+        private void defaultArt() {
+            runOnUiThread(new Runnable(){
+                @Override
+                public void run(){
+                ImageView albumArt = (ImageView) findViewById(R.id.albumArt);
+                Picasso.with(getApplicationContext()).load(R.drawable.no_cover).into(albumArt);
+                albumArt.setScaleX(1/2);
+                albumArt.setScaleY(1/2);
+
+                }
+            });
+        }
+    }
+
+
+    /////     Android Make API Call for json : Recent Tracks
 
     private class AsyncRecentMeta extends AsyncTask<String, Void, Void> {
         protected Void doInBackground(String... url) {
