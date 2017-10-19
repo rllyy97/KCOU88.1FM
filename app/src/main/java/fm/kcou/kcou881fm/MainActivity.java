@@ -35,12 +35,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MyActivity";
 
     String stream1 = "http://radio.kcou.fm:8180/stream";
-    String stream1Meta = "http://sc7.shoutcaststreaming.us:2199/rpc/c8180/streaminfo.get";
     String stream1Recent = "http://sc7.shoutcaststreaming.us:2199/recentfeed/c8180/json";
 //    String stream2 = "";
 //    String stream2Meta = "";
 
-    JSONObject json;
     JSONObject jsonRecent;
     JSONObject jsonArt;
 
@@ -52,16 +50,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        TextView titleTextView = (TextView) findViewById(R.id.titleTextView);
-        TextView artistTextView = (TextView) findViewById(R.id.artistTextView);
-        TextView albumTextView = (TextView) findViewById(R.id.albumTextView);
-        titleTextView.setSelected(true);
-        artistTextView.setSelected(true);
-        albumTextView.setSelected(true);
 
-
-        AsyncMeta getMeta = new AsyncMeta();
-        getMeta.execute(stream1Meta);
         AsyncRecentMeta getRecentMeta = new AsyncRecentMeta();
         getRecentMeta.execute(stream1Recent);
     }
@@ -87,13 +76,6 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            TextView titleTextView = (TextView) findViewById(R.id.titleTextView);
-            TextView artistTextView = (TextView) findViewById(R.id.artistTextView);
-            TextView albumTextView = (TextView) findViewById(R.id.albumTextView);
-            titleTextView.setText("");
-            artistTextView.setText(R.string.buffering);
-            albumTextView.setText("");
-
             mediaPlayer.prepareAsync();
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
                 public void onPrepared(MediaPlayer player){
@@ -106,8 +88,6 @@ public class MainActivity extends AppCompatActivity {
                     t.scheduleAtFixedRate(new TimerTask(){
                         public void run() {
                             if(playing!=0) {
-                                AsyncMeta getMeta = new AsyncMeta();
-                                getMeta.execute(stream1Meta);
                                 AsyncRecentMeta getRecentMeta = new AsyncRecentMeta();
                                 getRecentMeta.execute(stream1Recent);
                             }
@@ -129,10 +109,21 @@ public class MainActivity extends AppCompatActivity {
 
     /////     Android Make API Call for json : Now Playing
 
-    private class AsyncMeta extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String... url) {
+    public class AsyncMetaArt extends AsyncTask<Void, Void, Void> {
+        ImageView albumArt;
+        String title;
+        String artist;
+        public AsyncMetaArt(ImageView img, String title, String artist){
+            this.albumArt=img;
+            this.title=title;
+            this.artist=artist;
+        }
+
+
+        protected Void doInBackground(Void... param) {
             try {
-                json = readJsonFromUrl(url[0]);
+                String trackSearchURL = "http://ws.audioscrobbler.com/2.0/?method=track.search&track=" + title + "&artist=" + artist + "&api_key=03d2bcf571b5e6ea2c744cf32fd40cb9&format=json&limit=1";
+                jsonArt = readJsonFromUrl(trackSearchURL);
                 onPostExecute();
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -140,18 +131,18 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        private Void onPostExecute() throws IOException, JSONException {
+        private int onPostExecute() throws IOException, JSONException {
             runOnUiThread(new Runnable(){
                 @Override
                 public void run(){
                     try {
-                        setStreamMeta();
+                        setArt(albumArt);
                     } catch (JSONException | IOException e) {
                         e.printStackTrace();
                     }
                 }
             });
-            return null;
+            return 1;
         }
 
         private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
@@ -174,95 +165,9 @@ public class MainActivity extends AppCompatActivity {
             return sb.toString();
         }
 
-        private void setStreamMeta() throws JSONException, IOException {
-            TextView artistTextView = (TextView) findViewById(R.id.artistTextView);
-            TextView titleTextView = (TextView) findViewById(R.id.titleTextView);
-            TextView albumTextView = (TextView) findViewById(R.id.albumTextView);
-
-            String currentArtist = json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("artist");
-            String currentTitle = json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("title");
-            String currentAlbum = json.getJSONArray("data").getJSONObject(0).getJSONObject("track").getString("album");
-
-            artistTextView.setText(currentArtist);
-            titleTextView.setText(currentTitle);
-            albumTextView.setText(currentAlbum);
-
-            AsyncMetaArt getArt = new AsyncMetaArt();
-            getArt.execute(currentTitle,currentArtist);
-        }
-    }
-
-    /////
-
-    private class AsyncMetaArt extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String... param) {
-            if(!(param[0]=="Talk Break" || param[1]=="N/a")){
-                try {
-                    String trackSearchURL = "http://ws.audioscrobbler.com/2.0/?method=track.search&track=" + param[0] + "&artist=" + param[1] + "&api_key=03d2bcf571b5e6ea2c744cf32fd40cb9&format=json&limit=1";
-                    jsonArt = readJsonFromUrl(trackSearchURL);
-                    onPostExecute();
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                defaultArt();
-            }
-            return null;
-        }
-
-        private Void onPostExecute() throws IOException, JSONException {
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run(){
-                    try {
-                        setArt();
-                    } catch (JSONException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            return null;
-        }
-
-        private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
-            try {
-                InputStream is = new URL(url).openStream();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                String jsonText = readAll(rd);
-                JSONObject json = new JSONObject(jsonText);
-                is.close();
-                return json;
-            } catch (IOException ex){
-                return null;
-            }
-        }
-
-        private String readAll(Reader rd) throws IOException {
-            StringBuilder sb = new StringBuilder();
-            int cp;
-            while ((cp = rd.read()) != -1) {sb.append((char) cp);}
-            return sb.toString();
-        }
-
-        private void setArt() throws JSONException, IOException {
-            ImageView albumArt = (ImageView) findViewById(R.id.albumArt);
+        private void setArt(ImageView albumArt) throws JSONException, IOException {
             String albumArtURL = jsonArt.getJSONObject("results").getJSONObject("trackmatches").getJSONArray("track").getJSONObject(0).getJSONArray("image").getJSONObject(2).getString("#text");
             Picasso.with(getApplicationContext()).load(albumArtURL).into(albumArt);
-            albumArt.setScaleX(1);
-            albumArt.setScaleY(1);
-        }
-
-        private void defaultArt() {
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run(){
-                ImageView albumArt = (ImageView) findViewById(R.id.albumArt);
-                Picasso.with(getApplicationContext()).load(R.drawable.no_cover).into(albumArt);
-                albumArt.setScaleX(1/2);
-                albumArt.setScaleY(1/2);
-
-                }
-            });
         }
     }
 
@@ -315,24 +220,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void setStreamMeta() throws JSONException, IOException {
-            String[][] data = new String[4][3];
-            for(int i=0;i<4;i++){
-                String fullTitle = jsonRecent.getJSONArray("items").getJSONObject(i+1).getString("title");
+            String[][] data = new String[5][3];
+            for(int i=0;i<5;i++){
+                String fullTitle = jsonRecent.getJSONArray("items").getJSONObject(i).getString("title");
                 String[] track = fullTitle.split(" - ");
                 data[i][0] = track[1];
                 data[i][1] = track[0];
-                data[i][2] = jsonRecent.getJSONArray("items").getJSONObject(i+1).getString("description");
+                data[i][2] = jsonRecent.getJSONArray("items").getJSONObject(i).getString("description");
             }
 
-            LinearLayout recentTracks = (LinearLayout) findViewById(R.id.whatWasThatRecent);
-            for(int j=0;j<4;j++){
-                View v = recentTracks.getChildAt(j);
-                LinearLayout l = (LinearLayout) v;
-                for(int k=0;k<3;k++){
-                    View t = l.getChildAt(k);
-                    TextView text = (TextView) t;
+            LinearLayout recentTracks = (LinearLayout) findViewById(R.id.slidingUpDrawer);
+            for(int j=0;j<5;j++){
+                LinearLayout track = (LinearLayout) recentTracks.getChildAt(j);
+                LinearLayout metaText = (LinearLayout) track.getChildAt(1);
+                for(int k=0;k<3;k++) {
+                    TextView text = (TextView) metaText.getChildAt(k);
                     text.setText(data[j][k]);
                 }
+                new AsyncMetaArt((ImageView)track.getChildAt(0), metaText.getChildAt(0).toString(), metaText.getChildAt(1).toString()).execute();
+
             }
         }
     }
