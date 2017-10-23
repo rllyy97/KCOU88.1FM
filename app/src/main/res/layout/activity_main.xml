@@ -215,18 +215,15 @@
 
                 </LinearLayout>
 
-                <ImageButton
+                <TextView
                     android:layout_width="92dp"
                     android:layout_height="92dp"
-                    android:adjustViewBounds="false"
-                    android:background="@drawable/ic_favorite_border_white_24px"
-                    android:contentDescription="@string/button_play"
-                    android:onClick="playPauseStream"
-                    android:padding="16dp"
-                    android:scaleType="fitCenter"
-
-                    android:scaleX=".4"
-                    android:scaleY=".4" />
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/track_name"
+                    android:textColor="@android:color/background_light"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
             <LinearLayout
@@ -300,18 +297,15 @@
 
                 </LinearLayout>
 
-                <ImageButton
+                <TextView
                     android:layout_width="92dp"
                     android:layout_height="92dp"
-                    android:adjustViewBounds="false"
-                    android:background="@drawable/ic_favorite_border_white_24px"
-                    android:contentDescription="@string/button_play"
-                    android:onClick="playPauseStream"
-                    android:padding="16dp"
-                    android:scaleType="fitCenter"
-
-                    android:scaleX=".4"
-                    android:scaleY=".4" />
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/track_name"
+                    android:textColor="@android:color/background_light"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
             <LinearLayout
@@ -385,18 +379,15 @@
 
                 </LinearLayout>
 
-                <ImageButton
+                <TextView
                     android:layout_width="92dp"
                     android:layout_height="92dp"
-                    android:adjustViewBounds="false"
-                    android:background="@drawable/ic_favorite_border_white_24px"
-                    android:contentDescription="@string/button_play"
-                    android:onClick="playPauseStream"
-                    android:padding="16dp"
-                    android:scaleType="fitCenter"
-
-                    android:scaleX=".4"
-                    android:scaleY=".4" />
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/track_name"
+                    android:textColor="@android:color/background_light"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
             <LinearLayout
@@ -470,18 +461,15 @@
 
                 </LinearLayout>
 
-                <ImageButton
+                <TextView
                     android:layout_width="92dp"
                     android:layout_height="92dp"
-                    android:adjustViewBounds="false"
-                    android:background="@drawable/ic_favorite_border_white_24px"
-                    android:contentDescription="@string/button_play"
-                    android:onClick="playPauseStream"
-                    android:padding="16dp"
-                    android:scaleType="fitCenter"
-
-                    android:scaleX=".4"
-                    android:scaleY=".4" />
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:text="@string/track_name"
+                    android:textColor="@android:color/background_light"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 

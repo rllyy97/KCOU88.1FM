@@ -1,15 +1,23 @@
 package fm.kcou.kcou881fm;
 // Author: Riley Evans, started September 13 2017
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.RotateAnimation;
@@ -28,6 +36,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -45,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
 
     MediaPlayer mediaPlayer = new MediaPlayer();
     int playing = 0; // 0=paused, 1=playing 2=connecting
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,10 +160,15 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable(){
                 @Override
                 public void run(){
-                    try {
-                        setArt(albumArt);
-                    } catch (JSONException | IOException e) {
-                        e.printStackTrace();
+                    if(artist!="ID/PSA"){
+                        try {
+                            setArt(albumArt);
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        albumArt.setBackground(getResources().getDrawable(R.drawable.no_cover));
                     }
                 }
             });
@@ -232,13 +250,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void setStreamMeta() throws JSONException, IOException {
-            String[][] data = new String[5][3];
+            String[][] data = new String[5][4];
             for(int i=0;i<5;i++){
                 String fullTitle = jsonRecent.getJSONArray("items").getJSONObject(i).getString("title");
                 String[] track = fullTitle.split(" - ");
                 data[i][0] = track[1];
                 data[i][1] = track[0];
                 data[i][2] = jsonRecent.getJSONArray("items").getJSONObject(i).getString("description");
+                data[i][3] = jsonRecent.getJSONArray("items").getJSONObject(i).getString("date");
             }
 
             LinearLayout recentTracks = (LinearLayout) findViewById(R.id.slidingUpDrawer);
@@ -249,17 +268,37 @@ public class MainActivity extends AppCompatActivity {
                     TextView text = (TextView) metaText.getChildAt(k);
                     text.setText(data[j][k]);
                 }
+                if(j!=0){
+                    TextView timeStamp = (TextView) track.getChildAt(2);
+                    long unixTime = Long.parseLong(data[j][3]);
+                    java.util.Date time = new java.util.Date((long)unixTime*1000);
+                    DateFormat df = new SimpleDateFormat("hh:mm");
+                    timeStamp.setText(df.format(time));
+                }
                 new AsyncMetaArt((ImageView)track.getChildAt(0), data[j][0], data[j][1]).execute();
 
             }
         }
     }
 
-    /////
+    ///// Network Check
 
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
+    ///// Notification Services
+
+    NotificationCompat.Builder builder =
+            (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.no_cover)
+                    .setContentTitle("Notification Title")
+                    .setContentText("Notification Description");
+
+
+
+
+
 }
