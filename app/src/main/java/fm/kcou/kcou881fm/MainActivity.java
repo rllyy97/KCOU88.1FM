@@ -2,6 +2,7 @@ package fm.kcou.kcou881fm;
 // Author: Riley Evans, started September 13 2017
 import android.content.Context;
 
+import android.graphics.Matrix;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
@@ -11,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -69,6 +71,13 @@ public class MainActivity extends AppCompatActivity {
         else if(isNetworkAvailable()&&playing!=2){
             playing = 2;
 
+            ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
+            final RotateAnimation rotateAnim = new RotateAnimation(
+                    0, 3240, playButton.getWidth()/2, playButton.getHeight()/2);
+            rotateAnim.setDuration(2500); // Use 0 ms to rotate instantly
+            rotateAnim.setFillAfter(true); // Must be true or the animation will reset
+            playButton.startAnimation(rotateAnim);
+
             try {
                 mediaPlayer.setDataSource(stream1);
             } catch (IOException e) {
@@ -80,15 +89,18 @@ public class MainActivity extends AppCompatActivity {
                 public void onPrepared(MediaPlayer player){
                     player.start();
                     playing = 1;
+
                     ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
+                    rotateAnim.cancel();
+                    rotateAnim.reset();
                     playButton.setBackground(getResources().getDrawable(R.drawable.ic_pause_white_24px));
                         // Warning is not being handled to keep support for API 19, resolving requires API 21
+                    new AsyncRecentMeta().execute(stream1Recent);
                     final Timer t = new Timer();
                     t.scheduleAtFixedRate(new TimerTask(){
                         public void run() {
                             if(playing!=0) {
-                                AsyncRecentMeta getRecentMeta = new AsyncRecentMeta();
-                                getRecentMeta.execute(stream1Recent);
+                                new AsyncRecentMeta().execute(stream1Recent);
                             }
                             else {
                                 t.purge();
