@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -109,19 +108,20 @@ public class MainActivity extends AppCompatActivity {
 
     /////     Android Make API Call for json : Now Playing
 
-    public class AsyncMetaArt extends AsyncTask<Void, Void, Void> {
+    private class AsyncMetaArt extends AsyncTask<Void, Void, Void> {
         ImageView albumArt;
         String title;
         String artist;
-        public AsyncMetaArt(ImageView img, String title, String artist){
+        AsyncMetaArt(ImageView img, String title, String artist){
             this.albumArt=img;
             this.title=title;
             this.artist=artist;
         }
 
-
         protected Void doInBackground(Void... param) {
             try {
+                title = title.replaceAll("^\"|\"$", "");
+                artist = artist.replaceAll("^\"|\"$", "");
                 String trackSearchURL = "http://ws.audioscrobbler.com/2.0/?method=track.search&track=" + title + "&artist=" + artist + "&api_key=03d2bcf571b5e6ea2c744cf32fd40cb9&format=json&limit=1";
                 jsonArt = readJsonFromUrl(trackSearchURL);
                 onPostExecute();
@@ -237,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
                     TextView text = (TextView) metaText.getChildAt(k);
                     text.setText(data[j][k]);
                 }
-                new AsyncMetaArt((ImageView)track.getChildAt(0), metaText.getChildAt(0).toString(), metaText.getChildAt(1).toString()).execute();
+                new AsyncMetaArt((ImageView)track.getChildAt(0), data[j][0], data[j][1]).execute();
 
             }
         }
