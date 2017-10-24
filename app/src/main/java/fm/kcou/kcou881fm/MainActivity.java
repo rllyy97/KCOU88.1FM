@@ -1,33 +1,23 @@
 package fm.kcou.kcou881fm;
 // Author: Riley Evans, started September 13 2017
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
+import android.content.Context;
 import android.media.AudioManager;
-import android.media.Image;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.app.NotificationCompat;
-import android.util.Log;
+//import android.util.Log;
 import android.view.View;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -38,12 +28,13 @@ import java.io.Reader;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MyActivity";
+//    private static final String TAG = "MyActivity";
 
     String stream1 = "http://radio.kcou.fm:8180/stream";
     String stream1Recent = "http://sc7.shoutcaststreaming.us:2199/recentfeed/c8180/json";
@@ -76,8 +67,7 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.stop();
             playing = 0;
             ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
-            playButton.setBackground(getResources().getDrawable(R.drawable.ic_radio_white_24px));
-                // Warning is not being handled to keep support for API 19, resolving requires API 21
+            playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_radio_white_24px, null));
             mediaPlayer.reset();
         }
 
@@ -106,8 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
                     rotateAnim.cancel();
                     rotateAnim.reset();
-                    playButton.setBackground(getResources().getDrawable(R.drawable.ic_pause_white_24px));
-                        // Warning is not being handled to keep support for API 19, resolving requires API 21
+                    playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_white_24px, null));
                     new AsyncRecentMeta().execute(stream1Recent);
                     final Timer t = new Timer();
                     t.scheduleAtFixedRate(new TimerTask(){
@@ -160,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable(){
                 @Override
                 public void run(){
-                    if(artist!="ID/PSA"){
+                    if(!artist.equals("ID/PSA")){
                         try {
                             setArt(albumArt);
                         } catch (JSONException | IOException e) {
@@ -168,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     else {
-                        albumArt.setBackground(getResources().getDrawable(R.drawable.no_cover));
+                        albumArt.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.no_cover, null));
                     }
                 }
             });
@@ -197,7 +186,11 @@ public class MainActivity extends AppCompatActivity {
 
         private void setArt(ImageView albumArt) throws JSONException, IOException {
             String albumArtURL = jsonArt.getJSONObject("results").getJSONObject("trackmatches").getJSONArray("track").getJSONObject(0).getJSONArray("image").getJSONObject(2).getString("#text");
-            Picasso.with(getApplicationContext()).load(albumArtURL).into(albumArt);
+            try{
+                Picasso.with(getApplicationContext()).load(albumArtURL).into(albumArt);
+            } catch (Exception e){
+                albumArt.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.no_cover, null));
+            }
         }
     }
 
@@ -271,8 +264,8 @@ public class MainActivity extends AppCompatActivity {
                 if(j!=0){
                     TextView timeStamp = (TextView) track.getChildAt(2);
                     long unixTime = Long.parseLong(data[j][3]);
-                    java.util.Date time = new java.util.Date((long)unixTime*1000);
-                    DateFormat df = new SimpleDateFormat("hh:mm");
+                    java.util.Date time = new java.util.Date(unixTime*1000);
+                    DateFormat df = new SimpleDateFormat("hh:mm", Locale.ENGLISH);
                     timeStamp.setText(df.format(time));
                 }
                 new AsyncMetaArt((ImageView)track.getChildAt(0), data[j][0], data[j][1]).execute();
@@ -288,15 +281,6 @@ public class MainActivity extends AppCompatActivity {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-
-    ///// Notification Services
-
-    NotificationCompat.Builder builder =
-            (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.no_cover)
-                    .setContentTitle("Notification Title")
-                    .setContentText("Notification Description");
-
 
 
 
