@@ -75,6 +75,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.5"
                     app:srcCompat="@drawable/no_cover"
+                    android:contentDescription="@string/art1"
                      />
 
                 <LinearLayout
@@ -87,12 +88,12 @@
                     android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_gravity="center">
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:fadingEdge="horizontal"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -104,8 +105,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -116,8 +116,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:marqueeRepeatLimit="marquee_forever"
                         android:maxLines="1"
@@ -161,6 +160,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.5"
                     app:srcCompat="@drawable/no_cover"
+                    android:contentDescription="@string/art2"
                     />
 
                 <LinearLayout
@@ -173,12 +173,12 @@
                     android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_gravity="center">
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:fadingEdge="horizontal"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -190,8 +190,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -202,8 +201,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:marqueeRepeatLimit="marquee_forever"
                         android:maxLines="1"
@@ -243,6 +241,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.5"
                     app:srcCompat="@drawable/no_cover"
+                    android:contentDescription="@string/art3"
                     />
 
                 <LinearLayout
@@ -255,12 +254,12 @@
                     android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_gravity="center">
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:fadingEdge="horizontal"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -272,8 +271,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -284,8 +282,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:marqueeRepeatLimit="marquee_forever"
                         android:maxLines="1"
@@ -325,6 +322,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.5"
                     app:srcCompat="@drawable/no_cover"
+                    android:contentDescription="@string/art4"
                     />
 
                 <LinearLayout
@@ -337,12 +335,12 @@
                     android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_gravity="center">
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:fadingEdge="horizontal"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -354,8 +352,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -366,8 +363,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:marqueeRepeatLimit="marquee_forever"
                         android:maxLines="1"
@@ -407,6 +403,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.5"
                     app:srcCompat="@drawable/no_cover"
+                    android:contentDescription="@string/art5"
                     />
 
                 <LinearLayout
@@ -419,12 +416,12 @@
                     android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent">
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_gravity="center">
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:fadingEdge="horizontal"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -436,8 +433,7 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:marqueeRepeatLimit="marquee_forever"
@@ -448,15 +444,15 @@
 
                     <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        android:layout_height="20dp"
                         android:ellipsize="marquee"
                         android:marqueeRepeatLimit="marquee_forever"
                         android:maxLines="1"
                         android:text="@string/album_name"
                         android:textColor="@android:color/background_light"
                         android:textSize="16sp"
-                        android:textStyle="italic" />
+                        android:textStyle="italic"
+                        />
 
 
                 </LinearLayout>

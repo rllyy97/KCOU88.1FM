@@ -12,4 +12,11 @@
     <string name="buffering">Buffering</string>
     <string name="pause">Pause Music</string>
 
+    <string name="art1">Album Art 1</string>
+    <string name="art2">Album Art 2</string>
+    <string name="art3">Album Art 3</string>
+    <string name="art4">Album Art 4</string>
+    <string name="art5">Album Art 5</string>
+
+
 </resources>
