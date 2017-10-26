@@ -2,10 +2,10 @@
 
     <string name="app_name">KCOU 88.1 FM</string>
     <string name="button_play">Play Or Pause Music</string>
-    <string name="connection_warning">NO INTERNET CONNECTION</string>
+    <string name="connection_warning">No Internet Connection</string>
 
     <string name="track_name"> </string>
-    <string name="artist_name">Click The Radio to Play</string>
+    <string name="artist_name"> </string>
     <string name="album_name"> </string>
 
     <string name="play">Play Music</string>

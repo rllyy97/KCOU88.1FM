@@ -54,27 +54,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if(isNetworkAvailable()){
+            AsyncRecentMeta getRecentMeta = new AsyncRecentMeta();
+            getRecentMeta.execute(stream1Recent);
+        } else {
+            ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
+            playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
+        }
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-        AsyncRecentMeta getRecentMeta = new AsyncRecentMeta();
-        getRecentMeta.execute(stream1Recent);
+
     }
 
     public void playPauseStream(final View v) throws JSONException, IOException {
-        findViewById(R.id.connectionWarning).setVisibility(View.INVISIBLE);
-
+        ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
         if(playing==1){
             mediaPlayer.stop();
             playing = 0;
-            ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
             playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_radio_white_24px, null));
             mediaPlayer.reset();
         }
 
         else if(isNetworkAvailable()&&playing!=2){
             playing = 2;
-
-            ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
             final RotateAnimation rotateAnim = new RotateAnimation(
                     0, 3240, playButton.getWidth()/2, playButton.getHeight()/2);
             rotateAnim.setDuration(2500); // Use 0 ms to rotate instantly
@@ -114,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         else if(!isNetworkAvailable()){
-            findViewById(R.id.connectionWarning).setVisibility(View.VISIBLE);
+            playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
             playing = 0;
         }
     }
