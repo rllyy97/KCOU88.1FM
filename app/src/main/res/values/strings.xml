@@ -17,6 +17,9 @@
     <string name="art3">Album Art 3</string>
     <string name="art4">Album Art 4</string>
     <string name="art5">Album Art 5</string>
+    <string name="art6">Album Art 6</string>
+
+    <string name="recent_tracks">RECENT TRACKS</string>
 
 
 </resources>
