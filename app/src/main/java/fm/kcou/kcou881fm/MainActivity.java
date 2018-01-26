@@ -6,8 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -19,6 +17,9 @@ import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -52,16 +53,15 @@ public class MainActivity extends AppCompatActivity {
 
 //    private static final String TAG = "MyActivity";
 
-    String stream1 = "http://radio.kcou.fm:8180/stream";
+    StreamService stream;
+
+//    String stream1 = "http://radio.kcou.fm:8180/stream";
     String stream1Recent = "http://sc7.shoutcaststreaming.us:2199/recentfeed/c8180/json";
 //    String stream2 = "";
 //    String stream2Meta = "";
 
     JSONObject jsonRecent;
     JSONObject jsonArt;
-
-    MediaPlayer mediaPlayer = new MediaPlayer();
-    int playing = 0; // 0=paused, 1=playing 2=connecting
 
     ImageView bigArt;
     ConstraintLayout mainContent;
@@ -72,9 +72,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        stream = new StreamService();
         if(isNetworkAvailable()){
             getInitialSongList();
-
+            stream.build(getBaseContext());
             final Timer t = new Timer();
             t.scheduleAtFixedRate(new TimerTask(){
                 public void run() {
@@ -85,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
             ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
             playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
         }
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         bigArt = (ImageView) findViewById(R.id.bigArt);
         mainContent = (ConstraintLayout)findViewById(R.id.mainContent);
@@ -108,44 +108,70 @@ public class MainActivity extends AppCompatActivity {
 
     public void playPauseStream(final View v) throws JSONException, IOException {
         ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
-        if(playing==1){
-            mediaPlayer.stop();
-            playing = 0;
+        if(stream.getState() == 1){
+            stream.stop();
             playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_radio_white_24px, null));
-            mediaPlayer.reset();
         }
+        else if(isNetworkAvailable()&&stream.getState()!=2){
+            final RotateAnimation rotateAnimateUp = new RotateAnimation(
+                    0, 3240/2, playButton.getWidth()/2, playButton.getHeight()/2);
+            rotateAnimateUp.setDuration(1000); // Use 0 ms to rotate instantly
+            rotateAnimateUp.setFillAfter(true); // Must be true or the animation will reset
+            rotateAnimateUp.setInterpolator(new AccelerateInterpolator());
+            rotateAnimateUp.setAnimationListener(new Animation.AnimationListener() {
+                ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
+                @Override
+                public void onAnimationStart(Animation animation){}
 
-        else if(isNetworkAvailable()&&playing!=2){
-            playing = 2;
-            final RotateAnimation rotateAnim = new RotateAnimation(
-                    0, 3240, playButton.getWidth()/2, playButton.getHeight()/2);
-            rotateAnim.setDuration(2500); // Use 0 ms to rotate instantly
-            rotateAnim.setFillAfter(true); // Must be true or the animation will reset
-            playButton.startAnimation(rotateAnim);
-
-            try {
-                mediaPlayer.setDataSource(stream1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            mediaPlayer.prepareAsync();
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
-                public void onPrepared(MediaPlayer player){
-                    player.start();
-                    playing = 1;
-
-                    ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
-                    rotateAnim.cancel();
-                    rotateAnim.reset();
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    rotateAnimateUp.cancel();
+                    rotateAnimateUp.reset();
                     playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_white_24px, null));
+                    final RotateAnimation rotateAnimateDown = new RotateAnimation(
+                            0, 3240/2, playButton.getWidth()/2, playButton.getHeight()/2);
+                    rotateAnimateDown.setDuration(1000); // Use 0 ms to rotate instantly
+                    rotateAnimateDown.setFillAfter(true); // Must be true or the animation will reset
+                    rotateAnimateDown.setInterpolator(new DecelerateInterpolator());
+                    playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_white_24px, null));
+                    rotateAnimateDown.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
 
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            rotateAnimateDown.cancel();
+                            rotateAnimateDown.reset();
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+                    playButton.startAnimation(rotateAnimateDown);
                 }
+
+                @Override
+                public void onAnimationRepeat(Animation animation){}
             });
+            playButton.startAnimation(rotateAnimateUp);
+            stream.play();
+
         }
         else if(!isNetworkAvailable()){
             playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
-            playing = 0;
+            final Timer t = new Timer();
+            t.scheduleAtFixedRate(new TimerTask(){
+                public void run() {
+                    if(!isNetworkAvailable()){
+                        ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
+                        playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
+                    }
+                }
+            }, 5000, 5000);
         }
     }
 
