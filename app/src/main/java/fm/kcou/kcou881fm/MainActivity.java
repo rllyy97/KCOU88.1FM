@@ -154,19 +154,12 @@ public class MainActivity extends AppCompatActivity {
                 rotateAnimateDown.setFillAfter(true); // Must be true or the animation will reset
                 rotateAnimateDown.setInterpolator(new DecelerateInterpolator());
                 rotateAnimateDown.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
+                    @Override public void onAnimationStart(Animation animation) {}
+                    @Override public void onAnimationEnd(Animation animation) {
                         rotateAnimateDown.cancel();
                         rotateAnimateDown.reset();
                     }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-                    }
+                    @Override public void onAnimationRepeat(Animation animation) {}
                 });
                 playButton.startAnimation(rotateAnimateDown);
             }
@@ -289,9 +282,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override public void onSuccess() {
                             assignArt();
                         }
-                        @Override
-                        public void onError() {
-                        }
+                        @Override public void onError() {}
                     });
                 } else {
                     LinearLayout recentTracks = (LinearLayout) findViewById(R.id.slidingUpDrawer);
@@ -318,31 +309,22 @@ public class MainActivity extends AppCompatActivity {
             albumArtURL = albumArtURL.replaceAll("174s","1080x1080");
             try{
                 if(recentSongsArrayList.get(0).getArtist().equals("ID/PSA")){
-                    Picasso.with(getBaseContext()).load(R.drawable.background).into(bigArt, new Callback.EmptyCallback() {
+                    Picasso.with(getBaseContext()).load(R.drawable.background).config(Bitmap.Config.RGB_565).fit().centerCrop().into(bigArt, new Callback.EmptyCallback() {
                         @Override
-                        public void onSuccess() {
-                            colorEverything(R.color.colorAccent);
-                        }
+                        public void onSuccess() {colorEverything(getColor(R.color.colorPrimaryLight));}
                         @Override
-                        public void onError() {
-                            colorEverything(R.color.colorAccent);
-                        }
+                        public void onError() {colorEverything(getColor(R.color.colorPrimaryLight));}
                     });
                 } else if(albumArtURL == null) {
-                    Picasso.with(getBaseContext()).load(R.drawable.background).into(bigArt, new Callback.EmptyCallback() {
+                    Picasso.with(getBaseContext()).load(R.drawable.background).config(Bitmap.Config.RGB_565).fit().centerCrop().into(bigArt, new Callback.EmptyCallback() {
                         @Override
-                        public void onSuccess() {
-                            colorEverything(R.color.colorAccent);
-                        }
+                        public void onSuccess() {colorEverything(getColor(R.color.colorPrimaryLight));}
                         @Override
-                        public void onError() {
-                            colorEverything(R.color.colorAccent);
-                        }
+                        public void onError() {colorEverything(getColor(R.color.colorPrimaryLight));}
                     });
                 } else {
                     Picasso.with(getBaseContext()).load(albumArtURL).into(bigArt, new Callback.EmptyCallback() {
                         @Override public void onSuccess() {
-
                             Bitmap big = ((BitmapDrawable)bigArt.getDrawable()).getBitmap();
                             palette = Palette.from(big).generate();
                             int vibrant = palette.getVibrantColor(0);
@@ -357,7 +339,6 @@ public class MainActivity extends AppCompatActivity {
                             } else {
                                 colorEverything(Color.BLACK);
                             }
-
                         }
                         @Override
                         public void onError() {
@@ -365,8 +346,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 }
-
-
             } catch (Exception e){
                 bigArt.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.no_cover, null));
             }
