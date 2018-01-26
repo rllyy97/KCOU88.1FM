@@ -109,55 +109,11 @@ public class MainActivity extends AppCompatActivity {
     public void playPauseStream(final View v) throws JSONException, IOException {
         ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
         if(stream.getState() == 1){
+            spin(1);
             stream.stop();
-            playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_radio_white_24px, null));
         }
         else if(isNetworkAvailable()&&stream.getState()!=2){
-            final RotateAnimation rotateAnimateUp = new RotateAnimation(
-                    0, 3240/2, playButton.getWidth()/2, playButton.getHeight()/2);
-            rotateAnimateUp.setDuration(1000); // Use 0 ms to rotate instantly
-            rotateAnimateUp.setFillAfter(true); // Must be true or the animation will reset
-            rotateAnimateUp.setInterpolator(new AccelerateInterpolator());
-            rotateAnimateUp.setAnimationListener(new Animation.AnimationListener() {
-                ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
-                @Override
-                public void onAnimationStart(Animation animation){}
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    rotateAnimateUp.cancel();
-                    rotateAnimateUp.reset();
-                    playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_white_24px, null));
-                    final RotateAnimation rotateAnimateDown = new RotateAnimation(
-                            0, 3240/2, playButton.getWidth()/2, playButton.getHeight()/2);
-                    rotateAnimateDown.setDuration(1000); // Use 0 ms to rotate instantly
-                    rotateAnimateDown.setFillAfter(true); // Must be true or the animation will reset
-                    rotateAnimateDown.setInterpolator(new DecelerateInterpolator());
-                    playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_white_24px, null));
-                    rotateAnimateDown.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            rotateAnimateDown.cancel();
-                            rotateAnimateDown.reset();
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-
-                        }
-                    });
-                    playButton.startAnimation(rotateAnimateDown);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation){}
-            });
-            playButton.startAnimation(rotateAnimateUp);
+            spin(0);
             stream.play();
 
         }
@@ -173,6 +129,52 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, 5000, 5000);
         }
+    }
+
+    protected void spin(final int state){
+        ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
+        final RotateAnimation rotateAnimateUp = new RotateAnimation(
+                0, 360, playButton.getWidth()/2, playButton.getHeight()/2);
+        rotateAnimateUp.setDuration(250); // Use 0 ms to rotate instantly
+        rotateAnimateUp.setFillAfter(true); // Must be true or the animation will reset
+        rotateAnimateUp.setInterpolator(new AccelerateInterpolator());
+        rotateAnimateUp.setAnimationListener(new Animation.AnimationListener() {
+            ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
+            @Override
+            public void onAnimationStart(Animation animation){}
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                rotateAnimateUp.cancel();
+                rotateAnimateUp.reset();
+                if(state==0)playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_white_24px, null));
+                else playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_radio_white_24px, null));
+                final RotateAnimation rotateAnimateDown = new RotateAnimation(
+                        0, 360, playButton.getWidth()/2, playButton.getHeight()/2);
+                rotateAnimateDown.setDuration(250); // Use 0 ms to rotate instantly
+                rotateAnimateDown.setFillAfter(true); // Must be true or the animation will reset
+                rotateAnimateDown.setInterpolator(new DecelerateInterpolator());
+                rotateAnimateDown.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        rotateAnimateDown.cancel();
+                        rotateAnimateDown.reset();
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+                    }
+                });
+                playButton.startAnimation(rotateAnimateDown);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation){}
+        });
+        playButton.startAnimation(rotateAnimateUp);
     }
 
     protected void getInitialSongList(){
