@@ -1,7 +1,10 @@
 package fm.kcou.kcou881fm;
 // Author: Riley Evans, started September 13 2017
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -11,7 +14,9 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
@@ -68,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Song> recentSongsArrayList;
     Palette palette;
     ImageButton playButton;
+    int mNotificationId = 881;
+    NotificationManager mNotificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
             t.scheduleAtFixedRate(new TimerTask(){
                 public void run() {
                     new AsyncGetTopTrack().execute(stream1Recent);
+                    buildNotification();
                 }
             }, 15000, 15000);
         } else {
@@ -113,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
         else if(isNetworkAvailable()&&stream.getState()!=2){
             spin();
             stream.play();
+            buildNotification();
         }
         else if(!isNetworkAvailable()){
             playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
@@ -121,6 +130,10 @@ public class MainActivity extends AppCompatActivity {
                 public void run() {
                     if(!isNetworkAvailable()){
                         playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
+                    } else {
+                        playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_radio_white_24px, null));
+                        t.cancel();
+                        t.purge();
                     }
                 }
             }, 5000, 5000);
@@ -536,4 +549,25 @@ public class MainActivity extends AppCompatActivity {
 
     /////
 
+    void buildNotification(){
+        // The id of the channel.
+        String CHANNEL_ID = "stream_notification_channel";
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this, CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_radio_white_24px)
+                        .setContentTitle(recentSongsArrayList.get(0).getTitle())
+                        .setContentText(recentSongsArrayList.get(0).getArtist())
+                        .setStyle(new android.support.v7.app.NotificationCompat.MediaStyle()
+                                .setShowActionsInCompactView(1 /* #1: pause button */)
+                                .setMediaSession(MediaSessionCompat.Token.fromToken(stream.getmMediaSession().getSessionToken())));
+        Intent resultIntent = new Intent(getBaseContext(),this.getClass());
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(getBaseContext(), 0,
+                        resultIntent, 0);
+        mBuilder.setContentIntent(resultPendingIntent);
+        mNotificationManager =
+                (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.notify(mNotificationId, mBuilder.build());
+    }
 }

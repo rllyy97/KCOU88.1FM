@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.session.MediaSession;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -27,7 +28,10 @@ public class StreamService extends Service implements MediaPlayer.OnPreparedList
     AudioManager am;
     AudioManager.OnAudioFocusChangeListener afChangeListener;
     MediaController mediaController;
+    MediaSession mMediaSession;
+    String sessionID = "881";
     ImageButton playButton;
+//    int mNotificationId = 881;
 
     public void build(final Context context, ImageButton imageButton) {
         this.context = context;
@@ -47,7 +51,7 @@ public class StreamService extends Service implements MediaPlayer.OnPreparedList
             @Override public boolean canSeekForward() {return false;}
             @Override public int getAudioSessionId() {return 0;}
         });
-
+        mMediaSession = new MediaSession(context,sessionID);
         am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (wm != null) {
@@ -113,6 +117,7 @@ public class StreamService extends Service implements MediaPlayer.OnPreparedList
             e.printStackTrace();
         }
         mp.start();
+
         currentState=1;
     }
 
@@ -140,6 +145,11 @@ public class StreamService extends Service implements MediaPlayer.OnPreparedList
 
     int getState(){
         return currentState;
+    }
+
+
+    MediaSession getmMediaSession(){
+        return  mMediaSession;
     }
 
 //    MediaPlayer getMediaPlayer(){
