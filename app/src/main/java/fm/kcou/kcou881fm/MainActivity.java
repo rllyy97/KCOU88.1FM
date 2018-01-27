@@ -67,23 +67,24 @@ public class MainActivity extends AppCompatActivity {
     ConstraintLayout mainContent;
     ArrayList<Song> recentSongsArrayList;
     Palette palette;
+    ImageButton playButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        playButton = (ImageButton) findViewById(R.id.playButton);
         stream = new StreamService();
         if(isNetworkAvailable()){
             getInitialSongList();
-            stream.build(getBaseContext());
+            stream.build(getBaseContext(),playButton);
             final Timer t = new Timer();
             t.scheduleAtFixedRate(new TimerTask(){
                 public void run() {
                     new AsyncGetTopTrack().execute(stream1Recent);
                 }
-            }, 30000, 30000);
+            }, 15000, 15000);
         } else {
-            ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
             playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
         }
 
@@ -98,24 +99,20 @@ public class MainActivity extends AppCompatActivity {
         float dpWidth  = outMetrics.widthPixels;
 
         bigArt.setLayoutParams(new ConstraintLayout.LayoutParams((int)dpWidth,(int)dpWidth));
-
         bigArt.setMaxHeight((int)dpWidth);
         bigArt.setMaxWidth((int)dpWidth);
         bigArt.setMinimumHeight((int)dpWidth);
         bigArt.setMinimumWidth((int)dpWidth);
-
     }
 
     public void playPauseStream(final View v) throws JSONException, IOException {
-        ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
         if(stream.getState() == 1){
-            spin(1);
+            spin();
             stream.stop();
         }
         else if(isNetworkAvailable()&&stream.getState()!=2){
-            spin(0);
+            spin();
             stream.play();
-
         }
         else if(!isNetworkAvailable()){
             playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
@@ -123,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
             t.scheduleAtFixedRate(new TimerTask(){
                 public void run() {
                     if(!isNetworkAvailable()){
-                        ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
                         playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_portable_wifi_off_white_24px, null));
                     }
                 }
@@ -131,22 +127,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected void spin(final int state){
-        ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
+    protected void spin(){
         final RotateAnimation rotateAnimateUp = new RotateAnimation(
                 0, 360, playButton.getWidth()/2, playButton.getHeight()/2);
         rotateAnimateUp.setDuration(250); // Use 0 ms to rotate instantly
         rotateAnimateUp.setFillAfter(true); // Must be true or the animation will reset
         rotateAnimateUp.setInterpolator(new AccelerateInterpolator());
         rotateAnimateUp.setAnimationListener(new Animation.AnimationListener() {
-            ImageButton playButton = (ImageButton) findViewById(R.id.playButton);
             @Override
             public void onAnimationStart(Animation animation){}
             @Override
             public void onAnimationEnd(Animation animation) {
                 rotateAnimateUp.cancel();
                 rotateAnimateUp.reset();
-                if(state==0)playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_white_24px, null));
+                if(stream.getState()==1)playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_pause_white_24px, null));
                 else playButton.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_radio_white_24px, null));
                 final RotateAnimation rotateAnimateDown = new RotateAnimation(
                         0, 360, playButton.getWidth()/2, playButton.getHeight()/2);
@@ -278,12 +272,18 @@ public class MainActivity extends AppCompatActivity {
                     LinearLayout recentTracks = (LinearLayout) findViewById(R.id.slidingUpDrawer);
                     LinearLayout track = (LinearLayout) recentTracks.getChildAt(trackNumber+1);
                     ImageView artistIcon = (ImageView) track.getChildAt(0);
-                    Picasso.with(getBaseContext()).load(albumArtURL).into(artistIcon, new Callback.EmptyCallback() {
-                        @Override public void onSuccess() {
-                            assignArt();
-                        }
-                        @Override public void onError() {}
-                    });
+                    if(recentSongsArrayList.get(trackNumber).getArtist().equals("ID/PSA")){
+                        setDefualtImage(artistIcon);
+                    } else if(albumArtURL == null) {
+                        setDefualtImage(artistIcon);
+                    } else {
+                        Picasso.with(getBaseContext()).load(albumArtURL).into(artistIcon, new Callback.EmptyCallback() {
+                            @Override public void onSuccess() {
+                                assignArt();
+                            }
+                            @Override public void onError() {}
+                        });
+                    }
                 } else {
                     LinearLayout recentTracks = (LinearLayout) findViewById(R.id.slidingUpDrawer);
                     LinearLayout track = (LinearLayout) recentTracks.getChildAt(trackNumber+1);
@@ -309,19 +309,9 @@ public class MainActivity extends AppCompatActivity {
             albumArtURL = albumArtURL.replaceAll("174s","1080x1080");
             try{
                 if(recentSongsArrayList.get(0).getArtist().equals("ID/PSA")){
-                    Picasso.with(getBaseContext()).load(R.drawable.background).config(Bitmap.Config.RGB_565).fit().centerCrop().into(bigArt, new Callback.EmptyCallback() {
-                        @Override
-                        public void onSuccess() {colorEverything(getColor(R.color.colorPrimaryLight));}
-                        @Override
-                        public void onError() {colorEverything(getColor(R.color.colorPrimaryLight));}
-                    });
+                    setDefualtImage(bigArt);
                 } else if(albumArtURL == null) {
-                    Picasso.with(getBaseContext()).load(R.drawable.background).config(Bitmap.Config.RGB_565).fit().centerCrop().into(bigArt, new Callback.EmptyCallback() {
-                        @Override
-                        public void onSuccess() {colorEverything(getColor(R.color.colorPrimaryLight));}
-                        @Override
-                        public void onError() {colorEverything(getColor(R.color.colorPrimaryLight));}
-                    });
+                    setDefualtImage(bigArt);
                 } else {
                     Picasso.with(getBaseContext()).load(albumArtURL).into(bigArt, new Callback.EmptyCallback() {
                         @Override public void onSuccess() {
@@ -350,6 +340,15 @@ public class MainActivity extends AppCompatActivity {
                 bigArt.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.no_cover, null));
             }
         }
+    }
+
+    void setDefualtImage(ImageView imageView){
+        Picasso.with(getBaseContext()).load(R.drawable.background).config(Bitmap.Config.RGB_565).fit().centerCrop().into(imageView, new Callback.EmptyCallback() {
+            @Override
+            public void onSuccess() {colorEverything(getColor(R.color.colorPrimaryLight));}
+            @Override
+            public void onError() {colorEverything(getColor(R.color.colorPrimaryLight));}
+        });
     }
 
     private int makeTransparent(int color){
@@ -441,7 +440,6 @@ public class MainActivity extends AppCompatActivity {
                     String artist = track[0];
                     String album = jsonRecent.getJSONArray("items").getJSONObject(i).getString("description");
                     String time = jsonRecent.getJSONArray("items").getJSONObject(i).getString("date");
-//                    Bitmap image = ((BitmapDrawable) ResourcesCompat.getDrawable(getResources(), R.drawable.no_cover, null)).getBitmap();
                     new AsyncMetaArt(null, title, artist, i).execute();
                     al.add(new Song(title,artist,album,null,time));
                 }
@@ -511,10 +509,13 @@ public class MainActivity extends AppCompatActivity {
                 String artist = track[0];
                 String album = jsonRecent.getJSONArray("items").getJSONObject(0).getString("description");
                 String time = jsonRecent.getJSONArray("items").getJSONObject(0).getString("date");
-                if(!recentSongsArrayList.get(0).getTitle().equals(title)){
+
+                java.util.Date oldTime = new java.util.Date(Long.parseLong(recentSongsArrayList.get(0).getTime())*1000);
+                java.util.Date newTime = new java.util.Date((Long.parseLong(time))*1000);
+                if(oldTime.before(newTime)){
                     recentSongsArrayList.add(0,new Song(title, artist, album, null, time));
                     new AsyncMetaArt(null, title, artist, 0).execute();
-                }
+                } else { return; }
 
 
             }

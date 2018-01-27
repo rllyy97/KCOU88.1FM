@@ -8,28 +8,66 @@ import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.v4.content.res.ResourcesCompat;
+import android.widget.ImageButton;
+import android.widget.MediaController;
 
 import java.io.IOException;
+
+import static java.lang.Thread.sleep;
 
 // Created by riley on 1/25/2018
 
 public class StreamService extends Service implements MediaPlayer.OnPreparedListener,MediaPlayer.OnErrorListener {
-//    private static final String ACTION_PLAY = "com.example.action.PLAY";
-//    private static final String ACTION_STOP = "com.example.action.STOP";
+
     MediaPlayer mMediaPlayer = null;
     int currentState = 0; // 0=paused, 1=playing 2=connecting
     WifiManager.WifiLock wifiLock;
     Context context;
+    AudioManager am;
+    AudioManager.OnAudioFocusChangeListener afChangeListener;
+    MediaController mediaController;
+    ImageButton playButton;
 
-    public void build(Context context) {
+    public void build(final Context context, ImageButton imageButton) {
         this.context = context;
+        this.playButton = imageButton;
         mMediaPlayer = new MediaPlayer();
+        mediaController = new MediaController(context);
+        mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
+            @Override public void start() {play();}
+            @Override public void pause() {stop();}
+            @Override public int getDuration() {return 0;}
+            @Override public int getCurrentPosition() {return 0;}
+            @Override public void seekTo(int pos) {}
+            @Override public boolean isPlaying() {return false;}
+            @Override public int getBufferPercentage() {return 0;}
+            @Override public boolean canPause() {return false;}
+            @Override public boolean canSeekBackward() {return false;}
+            @Override public boolean canSeekForward() {return false;}
+            @Override public int getAudioSessionId() {return 0;}
+        });
 
+        am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (wm != null) {
             wifiLock = wm.createWifiLock(String.valueOf(WifiManager.WIFI_MODE_FULL));
             wifiLock.setReferenceCounted(true);
         }
+        afChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+            public void onAudioFocusChange(int focusChange) {
+                if (focusChange == AudioManager.AUDIOFOCUS_LOSS || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+                    stop();
+                    playButton.setBackground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_radio_white_24px, null));
+                } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                    mMediaPlayer.setVolume(0.2f,0.2f);
+                } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN || focusChange == AudioManager.AUDIOFOCUS_GAIN_TRANSIENT) {
+                    play();
+                    playButton.setBackground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_pause_white_24px, null));
+                    mMediaPlayer.setVolume(1.0f,1.0f);
+                }
+            }
+        };
     }
 
     @Override
@@ -48,6 +86,13 @@ public class StreamService extends Service implements MediaPlayer.OnPreparedList
         mMediaPlayer.setOnErrorListener(this);
     }
 
+    boolean createFocus(){
+        int result = am.requestAudioFocus(afChangeListener,
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
+        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
     void play() {
         currentState=2;
         initMediaPlayer();
@@ -56,11 +101,17 @@ public class StreamService extends Service implements MediaPlayer.OnPreparedList
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.prepareAsync();
         onPrepared(mMediaPlayer);
+        if(!createFocus()){stop();}
     }
 
     /** Called when MediaPlayer is ready */
     @Override
     public void onPrepared(MediaPlayer mp) {
+        try {
+            sleep(250);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         mp.start();
         currentState=1;
     }
@@ -73,6 +124,7 @@ public class StreamService extends Service implements MediaPlayer.OnPreparedList
             wifiLock.release();
         }
         currentState=0;
+        am.abandonAudioFocus(afChangeListener);
     }
 
     @Override
