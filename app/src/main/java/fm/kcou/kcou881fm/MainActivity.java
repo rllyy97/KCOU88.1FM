@@ -1,6 +1,7 @@
 package fm.kcou.kcou881fm;
 // Author: Riley Evans, started September 13 2017
 
+import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -223,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
 
     /////     Android Make API Call for json : Artist Image
 
+    @SuppressLint("StaticFieldLeak")
     private class AsyncMetaArt extends AsyncTask<Void, Void, Void> {
         Bitmap albumArt;
         String title;
@@ -393,6 +395,7 @@ public class MainActivity extends AppCompatActivity {
 
     /////     Android Make API Call for json : Recent Tracks
 
+    @SuppressLint("StaticFieldLeak")
     private class AsyncGetInitialSongList extends AsyncTask<String, Void, Void> {
         protected Void doInBackground(String... url) {
             try {
@@ -404,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        private Void onPostExecute() throws IOException, JSONException {
+        private void onPostExecute() throws IOException, JSONException {
             runOnUiThread(new Runnable(){
                 @Override
                 public void run(){
@@ -415,7 +418,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-            return null;
         }
 
         private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
@@ -464,6 +466,7 @@ public class MainActivity extends AppCompatActivity {
 
     ///// Get Top Track
 
+    @SuppressLint("StaticFieldLeak")
     private class AsyncGetTopTrack extends AsyncTask<String, Void, Void> {
         protected Void doInBackground(String... url) {
             try {
@@ -475,7 +478,7 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        private Void onPostExecute() throws IOException, JSONException {
+        private void onPostExecute() throws IOException, JSONException {
             runOnUiThread(new Runnable(){
                 @Override
                 public void run(){
@@ -486,7 +489,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-            return null;
         }
 
         private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
@@ -543,6 +545,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert connectivityManager != null;
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
@@ -551,9 +554,9 @@ public class MainActivity extends AppCompatActivity {
 
     void buildNotification(){
         // The id of the channel.
-        String CHANNEL_ID = "stream_notification_channel";
+//        String CHANNEL_ID = "stream_notification_channel";
         NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this, CHANNEL_ID)
+                new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_radio_white_24px)
                         .setContentTitle(recentSongsArrayList.get(0).getTitle())
                         .setContentText(recentSongsArrayList.get(0).getArtist())
